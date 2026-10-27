@@ -1,0 +1,44 @@
+name: Setup Esports Analytics Tools
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/vscode/devcontainers/base:2024.04.0  # Современная версия
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install pandas numpy matplotlib requests python-dotenv esports-stats  # Основные библиотеки
+
+      - name: Install additional dependencies
+        run: |
+          pip install dota2-api  # Пример для Dota 2
+          pip install csgo-tracker  # Пример для CS:GO
+
+      - name: Install Node.js (если нужно)
+        run: |
+          curl -fsSL https://deb.nodesource.com/setup-20.x | bash -
+          apt-get install -y nodejs
+
+      - name: Configure environment variables
+        run: |
+          echo "ESPORT_API_KEY=your_api_key_here" >> .env
+          echo "DATA_DIR=/workspace/data" >> .env
+
+      - name: Create data directory
+        run: mkdir -p /workspace/data
+
+      - name: Run initial setup script
+        run: |
+          python3 setup_esports.py  # Скрипт для инициализации анализа
